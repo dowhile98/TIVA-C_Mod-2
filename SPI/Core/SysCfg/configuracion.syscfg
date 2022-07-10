@@ -1,0 +1,33 @@
+/**
+ * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
+ * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
+ * @cliArgs --device "TM4C123x" --package "64 Pin QFP|16x16" --part "TM4C123GH6PM"
+ * @versions {"tool":"1.12.0+2406"}
+ */
+
+/**
+ * These are the peripherals and settings in this configuration
+ */
+const iGPIO1        = scripting.addPeripheral("GPIO");
+iGPIO1.$numPins     = 3;
+iGPIO1["0"].io      = "output";
+iGPIO1["0"].$assign = "PF1";
+iGPIO1["1"].io      = "output";
+iGPIO1["1"].$assign = "PF2";
+iGPIO1["2"].io      = "output";
+iGPIO1["2"].$assign = "PF3";
+iGPIO1.$name        = "LEDs";
+const iGPIO2        = scripting.addPeripheral("GPIO");
+iGPIO2.$numPins     = 2;
+iGPIO2["0"].pu_pd   = "pu";
+iGPIO2["0"].$assign = "PF0";
+iGPIO2["1"].pu_pd   = "pu";
+iGPIO2["1"].$assign = "PF4";
+iGPIO2.$name        = "SW";
+const iSSI1         = scripting.addPeripheral("SSI");
+iSSI1.$name         = "SPI0";
+iSSI1.$assign       = "SSI0";
+iSSI1.RX.$assign    = "PA4";
+iSSI1.FSS.$assign   = "PA3";
+iSSI1.TX.$assign    = "PA5";
+iSSI1.CLK.$assign   = "PA2";
