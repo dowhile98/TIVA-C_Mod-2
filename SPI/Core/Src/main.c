@@ -32,6 +32,29 @@ void SPI0_Init(void);
  * @param Len: Cantidad de datos a transmitir
  */
 void SPI0_SendData(uint8_t *pTxBuffer, uint32_t Len);
+
+/**
+ * @brief SPI receive data
+ * @param pTxBuffer: Puntero a datos a recibir
+ * @param Len: Cantidad de datos a recibir
+ */
+void SPI0_ReceiveData(uint8_t *pRxBuffer,uint32_t Len);
+
+/**
+ * @brief envia y recibe datos a la vez
+ * @param pTxBuffer: buffer a transmitir
+ * @param pRxBuffer: buffer donde se van almacenar los datos recibidos
+ * @param Len: cantidad de datos a enviar/recibir
+ */
+void SPI0_SendReceiveData(uint8_t *pTxBuffer,uint8_t *pRxBuffer,uint32_t Len);
+
+/**
+ * @brief se reciben datos
+ * @param pRxBuffer: buffer donde se van almacenar los datos recibidos
+ * @param Len: cantidad de datos a enviar/recibir
+ */
+void SPI0_MasterReceiveData(uint8_t *pRxBuffer,uint32_t Len);
+
 /*Main function -------------------------------------------------------------------*/
 int main(void)
 {
@@ -108,3 +131,79 @@ void SPI0_SendData(uint8_t *pTxBuffer, uint32_t Len){
 
     return;
 }
+
+
+
+void SPI0_ReceiveData(uint8_t *pRxBuffer,uint32_t Len){
+    while(Len>0){
+        while(!(SSI0_SR_R & SSI_SR_RNE));
+        if((SSI0_CR0_R & 0xF)>8){
+            *((uint16_t*)pRxBuffer) = SSI0_DR_R;
+            Len -= 2;
+            (uint16_t*)pRxBuffer++;
+        }else{
+            *(pRxBuffer) = SSI0_DR_R;
+            Len--;
+            pRxBuffer++;
+        }
+
+    }
+}
+
+void SPI0_SendReceiveData(uint8_t *pTxBuffer,uint8_t *pRxBuffer,uint32_t Len){
+    while(Len>0){
+
+        while(!(SSI0_SR_R & SSI_SR_TNF));
+
+        if((SSI0_CR0_R & 0xF)>8){
+            SSI0_DR_R = *((uint16_t*)pTxBuffer);
+
+            while(!(SSI0_SR_R & SSI_SR_RNE));
+
+            *((uint16_t*)pRxBuffer) = SSI0_DR_R;
+
+            Len -= 2;
+            (uint16_t*)pTxBuffer++;
+            (uint16_t*)pRxBuffer++;
+        }else{
+            SSI0_DR_R = *pTxBuffer;
+
+            while(!(SSI0_SR_R & SSI_SR_RNE));
+            *(pRxBuffer) = SSI0_DR_R;
+            pTxBuffer++;
+            pRxBuffer++;
+            Len--;
+        }
+    }
+
+    return;
+}
+
+
+void SPI0_MasterReceiveData(uint8_t *pRxBuffer,uint32_t Len){
+
+    while(Len>0){
+        while(!(SSI0_SR_R & SSI_SR_TNF));
+        if((SSI0_CR0_R & 0xF)>8){
+            SSI0_DR_R = (uint16_t) 0xFFFF;
+
+            while(!(SSI0_SR_R & SSI_SR_RNE));
+
+            *((uint16_t*)pRxBuffer) = SSI0_DR_R;
+
+            Len -= 2;
+            (uint16_t*)pRxBuffer++;
+        }else{
+            SSI0_DR_R = (uint8_t) 0xFF;
+            while(!(SSI0_SR_R & SSI_SR_RNE));
+
+            *(pRxBuffer) = SSI0_DR_R;
+
+            Len--;
+            pRxBuffer++;
+        }
+
+    }
+    while(SSI0_SR_R & SSI_SR_BSY);
+}
+
